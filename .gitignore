@@ -1,0 +1,23 @@
+# Kolla-Ansible
+kolla/passwords.yml
+
+# Terraform
+terraform/**/.terraform/
+terraform/**/*.tfstate
+terraform/**/*.tfstate.backup
+terraform/**/*.tfvars
+terraform/**/.terraform.lock.hcl
+
+# macOS
+.DS_Store
+
+# Editor
+*.swp
+*.swo
+*~
+
+# Secrets
+*.key
+*.pem
+*.crt
+!kolla/config/
