@@ -68,10 +68,12 @@ Heat (#1), Barbican (#2), Octavia (#3), Manila (#4), Swift (#5), Designate (#6),
 
 ## Host Requirements
 
-- Apple Silicon Mac (M2 Max or similar)
-- 96 GB RAM (72 GB allocated to VMs, 16 GB reserved for macOS)
-- ~180 GB free disk
+- Apple Silicon Mac (M-series)
+- 64 GB RAM minimum (reduce VM sizes in Lima configs if needed)
+- ~120 GB free disk (sparse-allocated, grows on demand)
 - Homebrew
+
+**Tested on:** M2 Max, 96 GB RAM, 72 GB allocated to VMs (32+28+12 GB across 3 nodes). The Lima VM configs can be scaled down for smaller machines -- the controller needs the most RAM (~16 GB minimum for all control plane services).
 
 ### Dependencies
 

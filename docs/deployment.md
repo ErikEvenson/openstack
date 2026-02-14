@@ -7,8 +7,10 @@ End-to-end instructions for deploying this OpenStack 2025.2 (Flamingo) lab from 
 ### Hardware
 
 - Apple Silicon Mac (M-series)
-- 96 GB RAM minimum (72 GB allocated to VMs)
-- ~180 GB free disk space (sparse-allocated)
+- 64 GB RAM minimum (reduce VM sizes in `lima/node*.yaml` if needed)
+- ~120 GB free disk space (sparse-allocated, grows on demand)
+
+**Tested on:** M2 Max with 96 GB RAM. The default Lima configs allocate 72 GB to VMs (32+28+12 GB). On a 64 GB machine, reduce node1 to 16 GB and node2 to 16 GB in the Lima YAML files before starting the VMs.
 
 ### Software
 
