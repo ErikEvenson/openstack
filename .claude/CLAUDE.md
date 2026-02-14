@@ -161,6 +161,10 @@ openstack/
 
 To deploy the lab from scratch, follow `docs/deployment.md`. It covers everything from SSH key generation through `kolla-ansible deploy` and post-deploy verification. Key things to watch for: absolute paths in `globals.yml` and `inventory` need to match the local checkout, `passwords.yml` and TLS certs must be generated before deploy, and all `kolla-ansible` commands need `--limit 'node1,node2,node3'` to exclude the macOS host.
 
+## Documentation
+
+**Keep `README.md` and `docs/deployment.md` up to date.** When making changes that affect the architecture, node layout, network topology, services, host requirements, or deployment workflow, update both files to reflect the new state. These are the primary entry points for new users and for Claude Code-assisted deployments.
+
 ## Constraints
 
 - **NEVER store credentials, passwords, keys, or secrets in the git repo.** All sensitive material goes in `.gitignore`.
