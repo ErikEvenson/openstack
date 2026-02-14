@@ -83,11 +83,18 @@ brew install lima socket_vmnet qemu
 
 ```
 openstack/
-├── lima/           # VM definitions, network config, SSH public key
+├── docs/           # Operational guides (first-instance CLI + GUI)
+├── lima/           # VM definitions, network config, SSH key pair
 ├── kolla/          # Kolla-Ansible config (globals, inventory, certificates)
+│   └── config/     # Service config overrides (merged by Kolla-Ansible)
 ├── terraform/      # Post-deploy OpenStack resource management (future)
 └── venv/           # Python virtualenv with kolla-ansible (gitignored)
 ```
+
+## Known Limitations
+
+- **VNC console frozen on aarch64** -- Nested QEMU with TCG (software emulation) causes the virtio-gpu framebuffer to freeze after boot. The VNC console in Horizon displays the boot screen but does not accept keyboard input. Workaround: SSH into instances via floating IPs, or use the serial console.
+- **Nested virtualization is slow** -- Guest VMs inside OpenStack use QEMU TCG (no KVM), so expect reduced performance. The `cpu_mode=custom` / `cpu_models=max` config in `kolla/config/nova/nova-compute.conf` provides the best available emulated CPU.
 
 ## Key Decisions
 
