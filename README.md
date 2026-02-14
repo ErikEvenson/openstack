@@ -79,11 +79,15 @@ Heat (#1), Barbican (#2), Octavia (#3), Manila (#4), Swift (#5), Designate (#6),
 brew install lima socket_vmnet qemu
 ```
 
+## Getting Started
+
+See the [Deployment Guide](docs/deployment.md) for end-to-end instructions from `git clone` to a running cluster.
+
 ## Project Structure
 
 ```
 openstack/
-├── docs/           # Operational guides (first-instance CLI + GUI)
+├── docs/           # Deployment guide, first-instance walkthroughs
 ├── lima/           # VM definitions, network config, SSH key pair
 ├── kolla/          # Kolla-Ansible config (globals, inventory, certificates)
 │   └── config/     # Service config overrides (merged by Kolla-Ansible)
