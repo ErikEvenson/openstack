@@ -85,6 +85,8 @@ brew install lima socket_vmnet qemu
 
 See the [Deployment Guide](docs/deployment.md) for end-to-end instructions from `git clone` to a running cluster.
 
+> **Using Claude Code?** Open this repo in Claude Code and ask it to deploy the lab. It has full architectural context via `.claude/CLAUDE.md` and can execute the deployment guide step by step. You'll just need to approve `sudo` prompts.
+
 ## Project Structure
 
 ```
