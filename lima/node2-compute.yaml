@@ -1,0 +1,93 @@
+# node2: Compute (+ Ceph OSD later)
+# 28 GB RAM, 4 vCPU, 40 GB OS disk, 20 GB Ceph OSD disk
+# Networks: management, tunnel, storage
+
+vmType: qemu
+arch: aarch64
+
+cpus: 4
+memory: 28GiB
+disk: 40GiB
+
+images:
+  - location: https://cloud-images.ubuntu.com/releases/24.04/release/ubuntu-24.04-server-cloudimg-arm64.img
+    arch: aarch64
+
+# Disable default mounts — not needed for OpenStack nodes
+mounts: []
+
+# Additional disks
+additionalDisks:
+  - name: node2-ceph-osd
+    format: false
+
+# Networks (3 interfaces)
+networks:
+  - lima: management
+    interface: lima0
+  - lima: tunnel
+    interface: lima1
+  - lima: storage
+    interface: lima2
+
+# SSH configuration
+ssh:
+  loadDotSSHPubKeys: false
+  forwardAgent: false
+
+# Cloud-init provisioning
+provision:
+  - mode: system
+    script: |
+      #!/bin/bash
+      set -eux
+
+      # Configure static IPs on all interfaces via netplan
+      cat > /etc/netplan/99-openstack.yaml << 'NETPLAN'
+      network:
+        version: 2
+        ethernets:
+          lima0:
+            dhcp4: false
+            addresses:
+              - 192.168.105.11/24
+            routes:
+              - to: default
+                via: 192.168.105.1
+            nameservers:
+              addresses:
+                - 192.168.105.1
+          lima1:
+            dhcp4: false
+            addresses:
+              - 10.0.1.11/24
+          lima2:
+            dhcp4: false
+            addresses:
+              - 10.0.3.11/24
+      NETPLAN
+
+      # Apply network configuration
+      netplan apply
+
+      # Set hostname
+      hostnamectl set-hostname node2.openstack.local
+      echo "192.168.105.10 node1.openstack.local node1" >> /etc/hosts
+      echo "192.168.105.11 node2.openstack.local node2" >> /etc/hosts
+      echo "192.168.105.12 node3.openstack.local node3" >> /etc/hosts
+      echo "192.168.105.250 controller.openstack.local controller" >> /etc/hosts
+
+      # Inject project SSH key
+      mkdir -p /root/.ssh
+      echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICXZQrTAjCCJsVRa48otnNiEWPXYnzpXTeYEgnTiZb8S openstack-lab-deploy" >> /root/.ssh/authorized_keys
+      chmod 600 /root/.ssh/authorized_keys
+
+      # Also add key for the default lima user
+      echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICXZQrTAjCCJsVRa48otnNiEWPXYnzpXTeYEgnTiZb8S openstack-lab-deploy" >> /home/$(ls /home/ | head -1)/.ssh/authorized_keys
+
+      # Configure NTP
+      timedatectl set-ntp true
+
+      # Update packages
+      apt-get update
+      apt-get install -y python3 python3-pip chrony

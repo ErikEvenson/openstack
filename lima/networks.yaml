@@ -1,0 +1,42 @@
+# Lima network definitions for OpenStack local lab
+# This file is the reference copy. The active copy lives at ~/.lima/_config/networks.yaml
+#
+# Networks:
+#   management - shared (NAT) - host and VM internet access, API, SSH
+#   tunnel     - host (isolated) - VXLAN overlay for VM-to-VM traffic
+#   external   - host (isolated) - floating IPs, Neutron br-ex
+#   storage    - host (isolated) - iSCSI (Cinder), Glance image transfers
+#
+# Management DHCP range ends at .249 to reserve .250 for kolla_internal_vip_address
+
+paths:
+  socketVMNet: /opt/socket_vmnet/bin/socket_vmnet
+  varRun: /private/var/run/lima
+  sudoers: /private/etc/sudoers.d/lima
+
+group: everyone
+
+networks:
+  management:
+    mode: shared
+    gateway: 192.168.105.1
+    dhcpEnd: 192.168.105.249
+    netmask: 255.255.255.0
+
+  tunnel:
+    mode: host
+    gateway: 10.0.1.1
+    dhcpEnd: 10.0.1.254
+    netmask: 255.255.255.0
+
+  external:
+    mode: host
+    gateway: 10.0.2.1
+    dhcpEnd: 10.0.2.254
+    netmask: 255.255.255.0
+
+  storage:
+    mode: host
+    gateway: 10.0.3.1
+    dhcpEnd: 10.0.3.254
+    netmask: 255.255.255.0

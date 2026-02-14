@@ -15,6 +15,7 @@
 - **OpenStack Release:** 2025.2 (Flamingo) — latest stable
 - **Deployment Tool:** Kolla-Ansible (containerized services via Docker)
 - **VM Hypervisor:** Lima + socket_vmnet (CNCF project, declarative YAML, multiple isolated L2 networks via vmnet-host)
+- **Lima Backend:** QEMU (via Apple HVF — native ARM64 speed, snapshot support, native socket_vmnet compatibility)
 - **VM Provisioning:** Lima declarative YAML configs + `limactl` CLI (not Terraform — no viable provider exists for macOS)
 - **Image Building:** Packer (if needed) or Lima cloud images + cloud-init
 - **Configuration Management:** Ansible (via Kolla-Ansible)
@@ -27,13 +28,14 @@
 
 ## Node Layout (3-Node)
 
-| Node | Role(s) | RAM | vCPU | OS Disk | Ceph OSD Disk |
-|------|---------|-----|------|---------|---------------|
-| node1 | Controller + Network (+ Ceph MON/MGR later) | 32 GB | 6 | 60 GB | — |
-| node2 | Compute (+ Ceph OSD later) | 28 GB | 4 | 40 GB | 20 GB (pre-provisioned) |
-| node3 | Storage / Cinder (+ Ceph OSD later) | 12 GB | 2 | 30 GB | 20 GB (pre-provisioned) |
+| Node | Role(s) | RAM | vCPU | OS Disk | LVM Disk | Ceph OSD Disk |
+|------|---------|-----|------|---------|----------|---------------|
+| node1 | Controller + Network (+ Ceph MON/MGR later) | 32 GB | 6 | 60 GB | — | — |
+| node2 | Compute (+ Ceph OSD later) | 28 GB | 4 | 40 GB | — | 20 GB (pre-provisioned) |
+| node3 | Storage / Cinder (+ Ceph OSD later) | 12 GB | 2 | 30 GB | 10 GB | 20 GB (pre-provisioned) |
 
-- **Totals:** 72 GB RAM, 12 vCPU, 130 GB OS disk, 40 GB Ceph OSD disk (unused initially)
+- **Totals:** 72 GB RAM, 12 vCPU, 130 GB OS disk, 10 GB LVM disk, 40 GB Ceph OSD disk
+- **Nominal total disk:** 180 GB (sparse allocation — actual usage much lower initially)
 - **Host reserve:** ~16 GB RAM, ~30 GB disk for macOS
 - **Scaling:** Add a second compute node later by reducing controller to 24 GB and compute nodes to 20 GB each.
 
@@ -67,6 +69,12 @@
 - **Neutron Backend:** OVN (modern default, distributed L3/DHCP/metadata).
 - **TLS Everywhere** — all API traffic encrypted (internal and external). Self-signed CA managed by Kolla-Ansible.
 - **Monitoring:** Prometheus + Grafana enabled from the start. Centralized logging (OpenSearch) deferred — add later via `kolla-ansible reconfigure`.
+- **Container Engine:** Docker CE (standard for Kolla-Ansible production deployments).
+- **Ubuntu Version:** 24.04 LTS (Noble).
+- **Deployer:** Kolla-Ansible runs from macOS host via Python venv, SSH into Lima VMs.
+- **SSH:** Dedicated key pair for the project (public key injected via cloud-init, private key in `.gitignore`).
+- **DNS:** BIND on node1. Domain: `openstack.local`. Production-like setup, positions for Designate integration later (Issue #6).
+- **Additional Services:** Core stack only (Nova, Neutron, Cinder, Glance, Keystone, Horizon). Others tracked as enhancement issues (#1-#9).
 
 ## Network Topology (4 Networks)
 
@@ -111,8 +119,14 @@
 | VM provisioning | Lima + socket_vmnet (declarative YAML, `limactl` CLI) |
 | VM networking | socket_vmnet (isolated L2 segments via vmnet-host with UUIDs) |
 | Base image building | Packer or Lima cloud images + cloud-init |
+| Container engine | Docker CE |
 | OpenStack deployment | Kolla-Ansible (Ansible + Docker) |
+| Neutron backend | OVN |
+| TLS | Everywhere (self-signed CA) |
+| DNS | BIND on node1 (`openstack.local`) |
+| Monitoring | Prometheus + Grafana |
 | Post-deploy resources | Terraform (OpenStack provider) |
+| Deployer | macOS host (Python venv + SSH) |
 
 ## Key Decision: Why Not Terraform for VM Layer
 
@@ -145,5 +159,6 @@ openstack/
 
 ## Constraints
 
+- **NEVER store credentials, passwords, keys, or secrets in the git repo.** All sensitive material goes in `.gitignore`.
 - **No `null_resource` usage** in Terraform configs.
 - **No Terraform at the VM layer** — Lima handles this directly.

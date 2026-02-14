@@ -1,5 +1,7 @@
 # Kolla-Ansible
 kolla/passwords.yml
+kolla/*-openrc*.sh
+kolla/clouds.yaml
 
 # Terraform
 terraform/**/.terraform/
@@ -21,3 +23,9 @@ terraform/**/.terraform.lock.hcl
 *.pem
 *.crt
 !kolla/config/
+
+# Python venv
+venv/
+
+# SSH private key (public key is OK to commit)
+lima/openstack-lab
