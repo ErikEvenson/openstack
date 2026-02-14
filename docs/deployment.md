@@ -2,6 +2,8 @@
 
 End-to-end instructions for deploying this OpenStack 2025.2 (Flamingo) lab from a fresh `git clone` to a running cluster.
 
+> **Using Claude Code?** You can ask Claude Code to deploy this lab for you. It has full context about the architecture via `.claude/CLAUDE.md` and can execute the steps below. Just open the repo in Claude Code and ask it to follow this deployment guide. You'll need to approve `sudo` prompts and be patient with long-running commands (`kolla-ansible deploy` takes 20-40 minutes).
+
 ## Prerequisites
 
 ### Hardware
